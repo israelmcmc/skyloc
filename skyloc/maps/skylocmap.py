@@ -57,27 +57,49 @@ class SkyLocMap(HealpixMap):
         return pix
 
     @classmethod
-    def from_coord_and_error(cls, skycoord, radius,
-                             cont = 0.632121,
-                             nside = None,
+    def point_source_map(cls,
+                         skycoord,
+                         sigma = None,
+                         cont = None,
+                         cont_radius = None,
+                         nside = None,
+                         sigma_hires = 5
     ):
         """
-        Create a probability map given a source location and  error radius. 
-        A 2D Gaussian probability distribution is assumed.
+        Create a probability map given a source location and error.
+
+        A 2D Gaussian probability distribution is assumed:
+
+        .. math::
+
+            P(r) = \frac{2}{\sigma^2} \exp \left( -r^2 / \sigma^2 \right)
+
+        Where :math:`r` is the angular distance to the specified source location.
 
         Args:
             skycoord (SkyCoord): Best estimate for the source location
-            radius (Angle or Quantity): Error radius 
-            cont (float): Fraction containment that the error radius 
-                corresponds to. Default is equivalent to radius = sigma
+            sigma (Angle or Quantity): Error radius.
+            cont (float): Alternatively, specify the error as a radius and containment
+                fraction. cont = 0.632121 is equivalent to cont_radius = sigma
+            cont_radius (Angle or Quantity): Error radius for a given containment
             nside (int): Override the nside estimated based on the error radius.
+            sigma_hr (float): Size of the high-resolution region as multiple of sigma.
         """
 
-        if not (cont > 0 and cont < 1):
-            raise ValueError("Containment must be in the range (0,1)")
-        
-        sigma = radius.to_value(u.rad) / np.sqrt(np.log(1/(1-cont)))
+        if sigma is None:
 
+            if cont is None or cont_radius is None:
+                raise ValueError("Specify either sigma or cont and cont_radius.")
+            
+            if not (cont > 0 and cont < 1):
+                raise ValueError("Containment must be in the range (0,1)")
+
+            sigma = cont_radius.to_value(u.rad) / np.sqrt(np.log(1/(1-cont)))
+
+        else:
+
+            sigma = sigma.to_value(u.rad)
+            
         if nside is None:
             # Pixel size is 5 times smaller than sigma
             approx_nside = 10*np.sqrt(4*np.pi/12)/sigma
@@ -94,7 +116,7 @@ class SkyLocMap(HealpixMap):
                                 source_ang.lat.deg,
                                 lonlat = True)
         
-        disc_pix = mEq.query_disc(source_vec, 5*sigma)
+        disc_pix = mEq.query_disc(source_vec, sigma_hires*sigma)
 
         # MOC map
         m = HealpixMap.moc_from_pixels(mEq.nside, disc_pix, density=True)
