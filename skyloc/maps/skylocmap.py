@@ -57,7 +57,7 @@ class SkyLocMap(HealpixMap):
         return pix
 
     @classmethod
-    def point_source_map(cls,
+    def error_radius_map(cls,
                          skycoord,
                          sigma = None,
                          cont = None,
