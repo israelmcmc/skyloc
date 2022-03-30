@@ -3,7 +3,10 @@ import mhealpy as hp
 
 import numpy as np
 
+import matplotlib.pyplot as plt
+
 from .skylocbase import SkyLocBase
+import skyloc.plot.axes
 
 from astropy.coordinates import UnitSphericalRepresentation, SkyCoord
 import astropy.units as u
@@ -158,3 +161,25 @@ class SkyLocMap(SkyLocBase, HealpixMap):
             nside (int): Override the nside estimated based on the error radius.
         """
 
+    def plot(self, *args, **kwargs):
+
+        return super().plot(*args, **kwargs, coord = self.frame)
+        
+    def plot_zoom(self,
+                  center,
+                  radius,
+                  rot = 0*u.deg,
+                  frame = 'icrs',
+                  *args, **kwargs):
+
+        fig = plt.figure(figsize = [4,4], dpi = 150)        
+
+        ax = fig.add_axes([0,0,1,1],
+                          projection = 'zoom_sin',
+                          center = center,
+                          radius = radius,
+                          rot = rot,
+                          frame = frame)
+        
+        return self.plot(ax = ax, *args, **kwargs)
+    
