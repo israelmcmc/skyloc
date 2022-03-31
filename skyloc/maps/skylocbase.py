@@ -65,7 +65,8 @@ class SkyLocBase(HealpixBase):
     def circular_roi(cls,
                      center,
                      radius,
-                     nside):
+                     nside,
+                     *arg, **kwargs):
         """
         Prepare a mesh with high resolution inside a circular disc.
 
@@ -90,7 +91,8 @@ class SkyLocBase(HealpixBase):
         m = HealpixBase.moc_from_pixels(mEq.nside, disc_pix)
 
         return cls(base = m,
-                   frame = center.frame)
+                   frame = center.frame,
+                   *args, **kwargs)
 
         
     @classmethod
@@ -98,7 +100,9 @@ class SkyLocBase(HealpixBase):
                     center,
                     radius,
                     width,
-                    nside):        
+                    nside,
+                    *args,
+                    **kwargs):        
         """
         Prepare a mesh with high resolution inside an annulus.
 
@@ -148,6 +152,6 @@ class SkyLocBase(HealpixBase):
                          moc.complement()._uniq_format().astype(int))
 
         # Create the empty map
-        return cls(uniq = uniq)
+        return cls(uniq = uniq, *args, **kwargs)
 
 
