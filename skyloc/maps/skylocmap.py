@@ -180,6 +180,7 @@ class SkyLocMap(SkyLocBase, HealpixMap):
         pixels_dist = np.arccos(np.matmul(center_vec, pixels_vec))
 
         radius_rad = radius.to_value(u.rad)
+
         m[:] = np.exp(-(pixels_dist - radius_rad)**2 / 2/sigma_rad/sigma_rad)
         
         # Normalize
@@ -211,4 +212,36 @@ class SkyLocMap(SkyLocBase, HealpixMap):
                           frame = frame)
         
         return self.plot(ax = ax, *args, **kwargs)
+
+    def plot_globe(self,
+                   center,
+                   rot = 0*u.deg,
+                   frame = 'icrs',
+                   *args, **kwargs):
+
+        fig = plt.figure(figsize = [4,4], dpi = 150)        
+
+        if frame == 'galactic':
+            center = center.transform_to('galactic')
+            frame = 'G'
+        elif frame == 'icrs':
+            center = center.transform_to('icrs')
+            frame = 'C'
+        else:
+            raise ValueError("Only 'icrs' and 'galactic are currently supported'")
+
+        center = center.represent_as(UnitSphericalRepresentation)
+        
+        ax = fig.add_axes([0,0,1,1],
+                          projection = 'orthview',
+                          rot = [center.lon.deg, center.lat.deg, rot.to_value(u.deg)],
+                          coord = frame)
+        
+        ax.coords[0].set_ticks_visible(True)
+        ax.coords[1].set_ticks_visible(True)
+        ax.coords[0].set_ticklabel_visible(True)
+        ax.coords[1].set_ticklabel_visible(True)
+
+        return self.plot(ax = ax, *args, **kwargs)
+
     
