@@ -12,6 +12,8 @@ from astropy.coordinates import UnitSphericalRepresentation, SkyCoord
 import astropy.units as u
 from astropy.units import cds
 
+from copy import deepcopy
+
 class SkyLocMap(SkyLocBase, HealpixMap):
     """
     Initialize HealpixMap with an attached coordinate frame.
@@ -243,6 +245,26 @@ class SkyLocMap(SkyLocBase, HealpixMap):
         ax.coords[1].set_ticklabel_visible(True)
 
         return self.plot(ax = ax, *args, **kwargs)
+
+    def get_integral_map(self):
+        
+        m = deepcopy(self)
+
+        m.density(False)
+
+        m /= np.sum(m)
+
+        return m
+    
+    def get_differential_map(self):
+
+        m = self.get_integral_map()
+
+        m /= m.pixarea()
+        
+        m.density(True, update = False)
+
+        return m
 
     def containment(self, cont, info = None):
         """
