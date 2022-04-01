@@ -66,7 +66,7 @@ class SkyLocBase(HealpixBase):
                      center,
                      radius,
                      nside,
-                     *arg, **kwargs):
+                     *args, **kwargs):
         """
         Prepare a mesh with high resolution inside a circular disc.
 
