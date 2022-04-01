@@ -244,4 +244,53 @@ class SkyLocMap(SkyLocBase, HealpixMap):
 
         return self.plot(ax = ax, *args, **kwargs)
 
-    
+    def containment(self, cont, info = None):
+        """
+        Find the area that contains a given fraction of the probability 
+        distribution.
+
+        Args:
+            cont (float or array): Containment fraction, within the range [0,1]
+            info (dict): If provided, the following information will be added to
+                the dictionary:
+                    - sortpix: Pixel indices order from highes to lower probability
+                    - cumprob: Cummulative probability, in the same order
+                    - cumarea: Cummulative area, in the same order
+                    - contind: Indices of sortpix that contain the input probability
+
+        """
+
+        # Convert from probability density to probability if needed 
+        prob = self.data
+
+        pixarea = self.pixarea(np.arange(self.npix))
+                    
+        if self.density():
+            prob *= pixarea 
+
+        # From from most like to least likely pixel
+        sortpix = np.argsort(prob)[::-1]
+
+        prob = prob[sortpix]
+
+        pixarea = pixarea[sortpix]
+
+        # Find cummulatives 
+        cumprob = np.cumsum(prob)
+
+        cumarea = np.cumsum(pixarea) * u.sr
+
+        # Containment area
+        contind = np.searchsorted(cumprob, cont)
+
+        area = cumarea[contind]
+
+        if info is not None:
+           info.update({"sortpix": sortpix, "cumprob": cumprob,
+                      "contind": contind, "cumarea": cumarea}) 
+        
+        return area
+
+
+
+        
