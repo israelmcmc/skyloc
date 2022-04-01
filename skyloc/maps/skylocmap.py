@@ -307,12 +307,21 @@ class SkyLocMap(SkyLocBase, HealpixMap):
 
         area = cumarea[contind]
 
+        # Contour levels
+        levels_pix = sortpix[contind]
+        levels = self[levels_pix]
+
+        if not self.density():
+            levels /= m.pixarea(levels_pix)
+        
         if info is not None:
-           info.update({"sortpix": sortpix, "cumprob": cumprob,
-                      "contind": contind, "cumarea": cumarea}) 
+           info.update({"sortpix": sortpix,
+                        "cumprob": cumprob,
+                        "contind": contind,
+                        "cumarea": cumarea,
+                        "contour_levels" : levels}) 
         
         return area
 
 
 
-        
