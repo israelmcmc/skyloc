@@ -288,7 +288,7 @@ class SkyLocMap(SkyLocBase, HealpixMap):
         pixarea = self.pixarea(np.arange(self.npix))
                     
         if self.density():
-            prob *= pixarea 
+            prob = prob*pixarea 
 
         # From from most like to least likely pixel
         sortpix = np.argsort(prob)[::-1]
